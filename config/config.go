@@ -78,7 +78,7 @@ func New(writer, errorWriter io.Writer) (*Config, error) {
 }
 
 // LoadViper reads the configuration file pointed to by
-// the configPath path and configName filename. 
+// the configPath path and configName filename.
 func LoadViper(configPath, configName string) (*viper.Viper, error) {
 	var errKnown string
 	switch configPath {
