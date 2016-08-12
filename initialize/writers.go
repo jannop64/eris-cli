@@ -47,6 +47,7 @@ func dropServiceDefaults(dir, from string, services []string) error {
 	return nil
 }
 
+// put in binary & kill GH repo
 func dropActionDefaults(dir, from string) error {
 	if err := drops(ver.ACTION_DEFINITIONS, "actions", dir, from); err != nil {
 		return err
