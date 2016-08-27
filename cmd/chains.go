@@ -408,7 +408,7 @@ func StopChain(cmd *cobra.Command, args []string) {
 }
 
 func MakeChain(cmd *cobra.Command, args []string) {
-	IfExit(ArgCheck(1, "ge", cmd, args))
+	IfExit(ArgCheck(1, "eq", cmd, args))
 	do.Name = args[0]
 	if do.Known && (do.ChainMakeActs == "" || do.ChainMakeVals == "") {
 		cmd.Help()
