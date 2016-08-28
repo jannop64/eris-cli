@@ -69,9 +69,11 @@ func StartChain(do *definitions.Do) error {
 	chainDirExists, chainConfigExists, chainDataExists, chainContainerExists := whatChainStuffExists(do.Name)
 
 	if do.Path != "" { // [eris chains start whatever --init-dir ~/.eris/chains/whatever]
-		//if !chainDirExists || !chainConfigExists { // do.Path given but neither dir or config exist
+		// TODO simplify short path on --init-dir
+		// do.Path = someFunctionToCheckAndSet(do.Path)
+
 		if !chainDirExists { // config not yet written to "CONFIG_PATH"
-			return fmt.Errorf("no dir or chain config")
+			return fmt.Errorf("no dir")
 		}
 		if chainDataExists || chainContainerExists { // these ought not be existing if --init-dir given
 			return fmt.Errorf("data container or chain  container exists")
@@ -136,6 +138,7 @@ func ExecChain(do *definitions.Do) (buf *bytes.Buffer, err error) {
 
 func startChain(do *definitions.Do, exec bool) (buf *bytes.Buffer, err error) {
 	chain, err := loaders.LoadChainDefinition(do.Name)
+	// ^ does not load chain.ChainID
 	if err != nil {
 		log.Error("Cannot start a chain I cannot find")
 		do.Result = "no file"
@@ -147,11 +150,22 @@ func startChain(do *definitions.Do, exec bool) (buf *bytes.Buffer, err error) {
 		do.Result = "no name"
 		return nil, nil
 	}
+	log.Warn("CHAINS_ID")
+	log.Warn(chain.ChainID)
+	log.Warn(do.ChainID)
+
+	chain.ChainID = do.Name
+	log.Warn(chain.ChainID)
 
 	// boot the dependencies (eg. keys, logrotate)
 	if err := bootDependencies(chain, do); err != nil {
 		return nil, err
 	}
+	//if chain.ChainID == "" {
+	//	chain.ChainID = do.ChainID
+	//}
+	log.Warn("CHAIN_ID")
+	log.Warn(chain.ChainID)
 
 	chain.Service.Command = loaders.ErisChainStart
 	util.Merge(chain.Operations, do.Operations)
@@ -340,11 +354,22 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 
 	// TODO get rid of this?
 	chain := loaders.MockChainDefinition(do.Name, do.ChainID)
+	log.Warn("chain id")
+	log.Warn(chain.ChainID)
+	log.Warn(do.ChainID)
 
+	// need to have chainID written in here... ?
 	chain, err = loaders.LoadChainDefinition(do.Name)
 	if err != nil {
 		return err
 	}
+
+	chain.ChainID = do.ChainID
+
+	log.Warn("chain ID")
+	log.Warn(chain.ChainID)
+	log.Warn(do.ChainID)
+
 	log.WithField("image", chain.Service.Image).Debug("Chain loaded")
 	chain.Operations.PublishAllPorts = do.Operations.PublishAllPorts // TODO: remove this and marshall into struct from cli directly
 	chain.Operations.Ports = do.Operations.Ports

@@ -74,6 +74,8 @@ func LoadChainDefinition(chainName string) (*definitions.Chain, error) {
 
 	// Overwrite chain.ChainID and chain.Service according from
 	// the definition.
+	chain.ChainID = chainName
+
 	if err = MarshalChainDefinition(definition, chain); err != nil {
 		return nil, err
 	}
@@ -165,7 +167,7 @@ func MarshalChainDefinition(definition *viper.Viper, chain *definitions.Chain) e
 	if len(chnTemp.Service.Ports) != 0 {
 		chain.Service.Ports = chnTemp.Service.Ports
 	}
-	chain.ChainID = chnTemp.ChainID
+	//chain.ChainID = chnTemp.ChainID
 
 	// toml bools don't really marshal well "data_container". It can be
 	// in the chain or in the service layer.
