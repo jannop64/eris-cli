@@ -267,6 +267,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	if do.ChainID == "" {
 		do.ChainID = do.Name
 	}
+	log.Warn(fmt.Sprintf("CHAIN_ID: %s", do.ChainID))
 
 	// writes a pointer (similar to checked out chain) for do.Path in the chain main dir
 	// this can then be read by loaders.LoadChainDefinition(), in order to get the
@@ -295,11 +296,8 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	}
 	log.WithField("=>", do.Name).Debug("Chain data container built")
 
-	// Get the config file
-	// TODO remove
-	//if do.ConfigFile == "" {
-	//	do.ConfigFile = filepath.Join(ChainsPath, "default", "config.toml")
-	//}
+	// set the config file (is this necessary?)
+	do.ConfigFile = filepath.Join(do.Path, "config.toml")
 
 	// Copy do.Path, do.GenesisFile, do.ConfigFile, do.Priv into container.
 	containerDst := path.Join(ErisContainerRoot, "chains", do.ChainID) // path in container
