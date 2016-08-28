@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/eris-ltd/eris-cli/config"
+	//"github.com/eris-ltd/eris-cli/config"
 	"github.com/eris-ltd/eris-cli/data"
 	"github.com/eris-ltd/eris-cli/definitions"
 	"github.com/eris-ltd/eris-cli/loaders"
@@ -69,7 +69,8 @@ func StartChain(do *definitions.Do) error {
 	chainDirExists, chainConfigExists, chainDataExists, chainContainerExists := whatChainStuffExists(do.Name)
 
 	if do.Path != "" { // [eris chains start whatever --init-dir ~/.eris/chains/whatever]
-		if !chainDirExists || !chainConfigExists { // do.Path given but neither dir or config exist
+		//if !chainDirExists || !chainConfigExists { // do.Path given but neither dir or config exist
+		if !chainDirExists { // config not yet written to "CONFIG_PATH"
 			return fmt.Errorf("no dir or chain config")
 		}
 		if chainDataExists || chainContainerExists { // these ought not be existing if --init-dir given
@@ -126,12 +127,6 @@ func StopChain(do *definitions.Do) error {
 		log.Info("Chain not currently running. Skipping")
 	}
 
-	//if do.Rm { // [zr] this is the job of RemoveChain(do)
-	//	if err := perform.DockerRemove(chain.Service, chain.Operations, do.RmD, do.Volumes, do.Force); err != nil {
-	//		return err
-	//	}
-	//}
-
 	return nil
 }
 
@@ -162,9 +157,6 @@ func startChain(do *definitions.Do, exec bool) (buf *bytes.Buffer, err error) {
 	util.Merge(chain.Operations, do.Operations)
 	chain.Service.Environment = append(chain.Service.Environment, "CHAIN_ID="+chain.ChainID)
 	chain.Service.Environment = append(chain.Service.Environment, do.Env...)
-	if do.Run {
-		chain.Service.Environment = append(chain.Service.Environment, "ERISDB_API=true")
-	}
 	chain.Service.Links = append(chain.Service.Links, do.Links...)
 
 	log.WithField("=>", chain.Service.Name).Info("Starting a chain")
@@ -263,6 +255,8 @@ func bootDependencies(chain *definitions.Chain, do *definitions.Do) error {
 
 // the main function for setting up a chain container
 // handles both "new" and "fetch" - most of the differentiating logic is in the container
+// should only be ever call on [eris chains start someChain --init-dir ~/.eris/chains/someChain/someChain_full_000]
+// or without the last dir for a simplechain
 func setupChain(do *definitions.Do, cmd string) (err error) {
 	// do.Name is mandatory
 	if do.Name == "" {
@@ -274,6 +268,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 		do.ChainID = do.Name
 	}
 
+	// TODO clean this up! (also, mostly checked in StartChain
 	if do.Path != "" {
 		src, errSaved := os.Stat(do.Path)
 		if errSaved != nil || !src.IsDir() {
@@ -287,8 +282,10 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 				return errSaved
 			}
 		}
+		// remove
 	} else if do.GenesisFile == "" && len(do.ConfigOpts) == 0 {
 		// NOTE: this expects you to have ~/.eris/chains/default/ (ie. to have run `eris init`)
+		// TODO remove!
 		do.Path, err = util.ChainsPathChecker("default")
 		if err != nil {
 			return err
@@ -311,9 +308,10 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	log.WithField("=>", do.Name).Debug("Chain data container built")
 
 	// Get the config file
-	if do.ConfigFile == "" {
-		do.ConfigFile = filepath.Join(ChainsPath, "default", "config.toml")
-	}
+	// TODO remove
+	//if do.ConfigFile == "" {
+	//	do.ConfigFile = filepath.Join(ChainsPath, "default", "config.toml")
+	//}
 
 	// Copy do.Path, do.GenesisFile, do.ConfigFile, do.Priv into container.
 	containerDst := path.Join(ErisContainerRoot, "chains", do.ChainID) // path in container
@@ -327,7 +325,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	if err = os.MkdirAll(dst, 0700); err != nil {
 		return fmt.Errorf("Error making data directory: %v", err)
 	}
-
+	//do.Config will need tuning
 	filesToCopy := []stringPair{
 		{do.Path, ""},
 		{do.GenesisFile, "genesis.json"},
@@ -354,19 +352,17 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 		return err
 	}
 
+	// TODO get rid of this?
 	chain := loaders.MockChainDefinition(do.Name, do.ChainID)
 
-	// Set maintainer info.
-	chain.Maintainer.Name, chain.Maintainer.Email, err = config.GitConfigUser()
-	if err != nil {
-		log.Debug(err.Error())
-	}
-
-	// Write the chain definition file.
-	// write in chains/chainName dir!
-	fileName := filepath.Join(ChainsPath, do.Name, do.Name) + ".toml"
+	// writes a pointer (similar to checked out chain) for do.Path in the chain main dir
+	// this can then be read by loaders.LoadChainDefinition(), in order to get the
+	// path to the config.toml that was written _in each directory_ (except for simplechain:( )
+	// this allows cli to keep track of a given config.toml
+	// [zr] this may conflict with how we use --machine ... ?
+	fileName := filepath.Join(ChainsPath, do.Name, "CONFIG_PATH")
 	if _, err = os.Stat(fileName); err != nil {
-		if err = WriteChainDefinitionFile(chain, fileName); err != nil {
+		if err = WriteChainDefinitionFile(do.Path, fileName); err != nil {
 			return fmt.Errorf("error writing chain definition to file: %v", err)
 		}
 	}
@@ -402,11 +398,6 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 		fmt.Sprintf("NODE_ADDR=%s", do.Gateway), // etcb host.
 	}
 	envVars = append(envVars, do.Env...)
-
-	if do.Run {
-		// run erisdb instead of tendermint
-		envVars = append(envVars, "ERISDB_API=true")
-	}
 
 	log.WithFields(log.Fields{
 		"environment": envVars,
