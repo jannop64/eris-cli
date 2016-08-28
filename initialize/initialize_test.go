@@ -26,6 +26,8 @@ var chnDir = filepath.Join(erisDir, "chains")
 var chnDefDir = filepath.Join(chnDir, "default")
 var toadUp bool
 
+// TODO [zr] remove toadserver references/tests
+
 func TestMain(m *testing.M) {
 	log.SetLevel(log.ErrorLevel)
 	// log.SetLevel(log.InfoLevel)
@@ -76,12 +78,6 @@ func TestDropActionDefaults(t *testing.T) {
 	}
 }
 
-func TestDropChainDefaults(t *testing.T) {
-	if err := testDrops(chnDir, "chains"); err != nil {
-		ifExit(fmt.Errorf("errors dropping chains: %v\n", err))
-	}
-}
-
 func testDrops(dir, kind string) error {
 	var dirToad = filepath.Join(dir, "toad")
 	var dirGit = filepath.Join(dir, "git")
@@ -113,16 +109,6 @@ func testDrops(dir, kind string) error {
 			}
 		}
 		if err := dropActionDefaults(dirGit, "rawgit"); err != nil {
-			ifExit(err)
-		}
-
-	case "chains":
-		if toadUp {
-			if err := dropChainDefaults(dirToad, "toadserver"); err != nil {
-				ifExit(err)
-			}
-		}
-		if err := dropChainDefaults(dirGit, "rawgit"); err != nil {
 			ifExit(err)
 		}
 	}

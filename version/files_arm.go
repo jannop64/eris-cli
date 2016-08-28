@@ -1,6 +1,7 @@
 package version
 
 var (
+	// TODO
 	SERVICE_DEFINITIONS = []string{
 		"ipfs",
 		"keys",
@@ -10,11 +11,5 @@ var (
 		"chain_info",
 		"dns_register",
 		"keys_list",
-	}
-
-	CHAIN_DEFINITIONS = []string{
-		"default",
-		"config",
-		"server_conf",
 	}
 )

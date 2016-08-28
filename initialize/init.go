@@ -57,10 +57,8 @@ Directory structure initialized:
 ¦   +-- apps/
 ¦   +-- bundles/
 ¦   +-- chains/
-¦       +-- account-types
-¦       +-- chain-types
-¦       +-- default/config.toml
-¦       +-- default.toml
+¦       +-- account-types/
+¦       +-- chain-types/
 ¦   +-- keys/
 ¦       +-- data/
 ¦       +-- names/
@@ -96,13 +94,9 @@ line to the %s definition file.
 func InitDefaults(do *definitions.Do, newDir bool) error {
 	var srvPath string
 	var actPath string
-	var chnPath string
 
 	srvPath = common.ServicesPath
 	actPath = common.ActionsPath
-	chnPath = common.ChainsPath
-
-	tsErrorFix := "toadserver may be down: re-run with `--source=rawgit`"
 
 	// Default or custom service definition files list.
 	services := ver.SERVICE_DEFINITIONS
@@ -111,15 +105,11 @@ func InitDefaults(do *definitions.Do, newDir bool) error {
 	}
 
 	if err := dropServiceDefaults(srvPath, do.Source, services); err != nil {
-		return fmt.Errorf("%v\n%s\n", err, tsErrorFix)
+		return err
 	}
 
 	if err := dropActionDefaults(actPath, do.Source); err != nil {
-		return fmt.Errorf("%v\n%s\n", err, tsErrorFix)
-	}
-
-	if err := dropChainDefaults(chnPath, do.Source); err != nil {
-		return fmt.Errorf("%v\n%s\n", err, tsErrorFix)
+		return err
 	}
 
 	log.WithField("root", common.ErisRoot).Warn("Initialized Eris root directory")
