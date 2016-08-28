@@ -29,10 +29,11 @@ func whatChainStuffExists(chainName string) (bool, bool, bool, bool) {
 	var chainContainerExists bool
 
 	// does the chain directory exist?
-	if util.DoesDirExist(chainName) {
+	if util.DoesDirExist(filepath.Join(ChainsPath, chainName)) {
 		chainDirExists = true
 	} else {
 		chainDirExists = false
+		log.Debug("no chain dir exists")
 	}
 
 	// does the config file exist?
@@ -41,6 +42,8 @@ func whatChainStuffExists(chainName string) (bool, bool, bool, bool) {
 		chainConfigExists = true
 	} else {
 		chainConfigExists = false
+		log.Debug("no config file exists")
+		log.Warn(fmt.Sprintf("error: %v", err))
 	}
 
 	// does the chain data container exist?
@@ -48,6 +51,7 @@ func whatChainStuffExists(chainName string) (bool, bool, bool, bool) {
 		chainDataExists = true
 	} else {
 		chainDataExists = false
+		log.Debug("no data container exists")
 	}
 
 	// does the chain container exist?
@@ -55,6 +59,7 @@ func whatChainStuffExists(chainName string) (bool, bool, bool, bool) {
 		chainContainerExists = true
 	} else {
 		chainContainerExists = false
+		log.Debug("no chain container exists")
 	}
 
 	return chainDirExists, chainConfigExists, chainDataExists, chainContainerExists
@@ -65,10 +70,10 @@ func StartChain(do *definitions.Do) error {
 
 	if do.Path != "" { // [eris chains start whatever --init-dir ~/.eris/chains/whatever]
 		if !chainDirExists || !chainConfigExists { // do.Path given but neither dir or config exist
-			return fmt.Errorf("")
+			return fmt.Errorf("no dir or chain config")
 		}
 		if chainDataExists || chainContainerExists { // these ought not be existing if --init-dir given
-			return fmt.Errorf("")
+			return fmt.Errorf("data container or chain  container exists")
 		}
 
 		// clean leftover data in ~/.eris/scratch/data

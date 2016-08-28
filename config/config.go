@@ -81,6 +81,7 @@ func New(writer, errorWriter io.Writer) (*Config, error) {
 // the configPath path and configName filename. 
 func LoadViper(configPath, configName string) (*viper.Viper, error) {
 	var errKnown string
+	// no longer works for dir.ChainsPath
 	switch configPath {
 	case dir.ChainsPath, dir.ServicesPath, dir.ActionsPath:
 		errKnown = fmt.Sprintf(`
