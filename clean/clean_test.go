@@ -220,10 +220,9 @@ func testStartChain(chainName string, t *testing.T) {
 
 	do := definitions.NowDo()
 	do.Name = chainName
-	do.Yes = true
 	do.Operations.PublishAllPorts = true
 	do.Path = filepath.Join(common.ChainsPath, chainName)
-	do.ConfigFile = filepath.Join(common.ChainsPath, "default", "config.toml")
+	do.ConfigFile = filepath.Join(common.ChainsPath, "default", "config.toml") // TODO remove
 	if err := chains.StartChain(do); err != nil {
 		t.Fatalf("starting chain %v failed: %v", chainName, err)
 	}

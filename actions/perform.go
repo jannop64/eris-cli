@@ -42,6 +42,7 @@ func Do(do *definitions.Do) error {
 	return nil
 }
 
+// [zr] actions probably shouldn't _start_ chains, only check that they are running
 func StartServicesAndChains(do *definitions.Do) error {
 	// start the services and chains
 	doSrvs := definitions.NowDo()

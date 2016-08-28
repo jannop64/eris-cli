@@ -23,13 +23,11 @@ import (
 var (
 	erisDir   = filepath.Join(os.TempDir(), "eris")
 	chainName = "test-chain"
-
-//	chainNameFix = "test-chain-fix"
 )
 
 func TestMain(m *testing.M) {
 	log.SetLevel(log.ErrorLevel)
-	//log.SetLevel(log.InfoLevel)
+	// log.SetLevel(log.InfoLevel)
 	// log.SetLevel(log.DebugLevel)
 
 	tests.IfExit(tests.TestsInit(tests.ConnectAndPull))
@@ -689,11 +687,11 @@ func create(t *testing.T, chain string) {
 	}
 
 	do := def.NowDo()
-	do.ConfigFile = filepath.Join(common.ChainsPath, "default", "config.toml")
 	do.Name = chain
-	do.Path = filepath.Join(common.ChainsPath, chain)
 	do.Operations.PublishAllPorts = true
 	do.Path = filepath.Join(common.ChainsPath, chain)
+	// TODO remove; blocking on cm
+	do.ConfigFile = filepath.Join(common.ChainsPath, "default", "config.toml")
 	if err := StartChain(do); err != nil {
 		t.Fatalf("expected a new chain to be created, got %v", err)
 	}
@@ -704,7 +702,6 @@ func start(t *testing.T, chain string) {
 	do := def.NowDo()
 	do.Name = chain
 	do.Operations.PublishAllPorts = true
-	do.Yes = true
 	//do.Path = filepath.Join(common.ChainsPath, do.Name)
 	if err := StartChain(do); err != nil {
 		t.Fatalf("starting chain %v failed: %v", chain, err)
