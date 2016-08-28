@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	ver "github.com/eris-ltd/eris-cli/version"
+	log "github.com/eris-ltd/eris-logger"
 
 	dir "github.com/eris-ltd/common/go/common"
 
@@ -81,9 +82,8 @@ func New(writer, errorWriter io.Writer) (*Config, error) {
 // the configPath path and configName filename. 
 func LoadViper(configPath, configName string) (*viper.Viper, error) {
 	var errKnown string
-	// no longer works for dir.ChainsPath
 	switch configPath {
-	case dir.ChainsPath, dir.ServicesPath, dir.ActionsPath:
+	case dir.ServicesPath, dir.ActionsPath:
 		errKnown = fmt.Sprintf(`
 
 List available definitions with the [eris %s ls --known] command`, filepath.Base(configPath))
@@ -95,6 +95,9 @@ List available definitions with the [eris %s ls --known] command`, filepath.Base
 	// Don't use os.Stat() for checking file existence because there might
 	// be a selection of supported definition files, e.g.: keys.toml,
 	// keys.json, keys.yaml, etc.
+	log.Warn("inside viper")
+	log.Warn(filepath.Join(configPath, configName))
+
 	if matches, _ := filepath.Glob(filepath.Join(configPath, configName+".*")); len(matches) == 0 {
 		return nil, fmt.Errorf("Unable to find the %q definition: %v%s", configName, os.ErrNotExist, errKnown)
 	}

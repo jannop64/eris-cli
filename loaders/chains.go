@@ -46,13 +46,30 @@ func LoadChainDefinition(chainName string) (*definitions.Chain, error) {
 	// like checkout out chains does it
 
 	whereIsTheConfigFile := filepath.Join(common.ChainsPath, chainName, "CONFIG_PATH")
+	definition := viper.New()
+	var err error
 	pathToConfig, err := ioutil.ReadFile(whereIsTheConfigFile)
 	if err != nil {
 		return nil, err
 	}
+
 	definition, err := config.LoadViper(string(pathToConfig), "config")
 	if err != nil {
 		return nil, err
+		// try in chain dir
+		definition, err := config.LoadViper(string(pathToConfig), "config")
+		if err != nil {
+			return nil, err
+		}
+	} else {
+
+		log.Warn("MARMOTpathConfig")
+		log.Warn(string(pathToConfig))
+
+		definition, err := config.LoadViper(string(pathToConfig), "config")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Overwrite chain.ChainID and chain.Service according from

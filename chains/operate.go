@@ -43,7 +43,7 @@ func whatChainStuffExists(chainName string) (bool, bool, bool, bool) {
 	} else {
 		chainConfigExists = false
 		log.Debug("no config file exists")
-		log.Warn(fmt.Sprintf("error: %v", err))
+		//log.Warn(fmt.Sprintf("error: %v", err))
 	}
 
 	// does the chain data container exist?
@@ -268,27 +268,15 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 		do.ChainID = do.Name
 	}
 
-	// TODO clean this up! (also, mostly checked in StartChain
-	if do.Path != "" {
-		src, errSaved := os.Stat(do.Path)
-		if errSaved != nil || !src.IsDir() {
-			log.WithField("path", do.Path).Info("Path does not exist or not a directory")
-			log.WithField("path", "$HOME/.eris/chains/"+do.Path).Info("Trying")
-			do.Path, err = util.ChainsPathChecker(do.Path)
-			if err != nil {
-				// Output the error of first attempt, not the second, because
-				// this "stat /Users/peter/.eris/chains/Users/peter/.eris/simplechain:
-				// no such file or directory" is ugly.
-				return errSaved
-			}
-		}
-		// remove
-	} else if do.GenesisFile == "" && len(do.ConfigOpts) == 0 {
-		// NOTE: this expects you to have ~/.eris/chains/default/ (ie. to have run `eris init`)
-		// TODO remove!
-		do.Path, err = util.ChainsPathChecker("default")
-		if err != nil {
-			return err
+	// writes a pointer (similar to checked out chain) for do.Path in the chain main dir
+	// this can then be read by loaders.LoadChainDefinition(), in order to get the
+	// path to the config.toml that was written _in each directory_ (except for simplechain:( )
+	// this allows cli to keep track of a given config.toml
+	// [zr] this may conflict with how we use --machine ... ?
+	fileName := filepath.Join(ChainsPath, do.Name, "CONFIG_PATH")
+	if _, err = os.Stat(fileName); err != nil {
+		if err = WriteChainDefinitionFile(do.Path, fileName); err != nil {
+			return fmt.Errorf("error writing chain definition to file: %v", err)
 		}
 	}
 
@@ -354,18 +342,6 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 
 	// TODO get rid of this?
 	chain := loaders.MockChainDefinition(do.Name, do.ChainID)
-
-	// writes a pointer (similar to checked out chain) for do.Path in the chain main dir
-	// this can then be read by loaders.LoadChainDefinition(), in order to get the
-	// path to the config.toml that was written _in each directory_ (except for simplechain:( )
-	// this allows cli to keep track of a given config.toml
-	// [zr] this may conflict with how we use --machine ... ?
-	fileName := filepath.Join(ChainsPath, do.Name, "CONFIG_PATH")
-	if _, err = os.Stat(fileName); err != nil {
-		if err = WriteChainDefinitionFile(do.Path, fileName); err != nil {
-			return fmt.Errorf("error writing chain definition to file: %v", err)
-		}
-	}
 
 	chain, err = loaders.LoadChainDefinition(do.Name)
 	if err != nil {
