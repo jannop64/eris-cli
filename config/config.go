@@ -31,14 +31,15 @@ type ErisCli struct {
 }
 
 type ErisConfig struct {
-	IpfsHost       string `json:"IpfsHost,omitempty" yaml:"IpfsHost,omitempty" toml:"IpfsHost,omitempty"`
-	IpfsPort       string `json:"IpfsPort,omitempty" yaml:"IpfsPort,omitempty" toml:"IpfsPort,omitempty"`
-	CompilersHost  string `json:"CompilersHost,omitempty" yaml:"CompilersHost,omitempty" toml:"CompilersHost,omitempty"` // currently unused
-	CompilersPort  string `json:"CompilersPort,omitempty" yaml:"CompilersPort,omitempty" toml:"CompilersPort,omitempty"` // currently unused
-	DockerHost     string `json:"DockerHost,omitempty" yaml:"DockerHost,omitempty" toml:"DockerHost,omitempty"`
-	DockerCertPath string `json:"DockerCertPath,omitempty" yaml:"DockerCertPath,omitempty" toml:"DockerCertPath,omitempty"`
-	CrashReport    string `json:"CrashReport,omitempty" yaml:"CrashReport,omitempty" toml:"CrashReport,omitempty"`
-	Verbose        bool
+	IpfsHost          string `json:"IpfsHost,omitempty" yaml:"IpfsHost,omitempty" toml:"IpfsHost,omitempty"`
+	IpfsPort          string `json:"IpfsPort,omitempty" yaml:"IpfsPort,omitempty" toml:"IpfsPort,omitempty"`
+	CompilersHost     string `json:"CompilersHost,omitempty" yaml:"CompilersHost,omitempty" toml:"CompilersHost,omitempty"` // currently unused
+	CompilersPort     string `json:"CompilersPort,omitempty" yaml:"CompilersPort,omitempty" toml:"CompilersPort,omitempty"` // currently unused
+	DockerHost        string `json:"DockerHost,omitempty" yaml:"DockerHost,omitempty" toml:"DockerHost,omitempty"`
+	DockerCertPath    string `json:"DockerCertPath,omitempty" yaml:"DockerCertPath,omitempty" toml:"DockerCertPath,omitempty"`
+	CrashReport       string `json:"CrashReport,omitempty" yaml:"CrashReport,omitempty" toml:"CrashReport,omitempty"`
+	ImagesPullTimeout string `json:"ImagesPullTimeout,omitempty" yaml:"ImagesPullTimeout,omitempty" toml:"ImagesPullTimeout,omitempty"`
+	Verbose           bool
 
 	//image defaults
 	ERIS_REG_DEF string `json:"ERIS_REG_DEF,omitempty" yaml:"ERIS_REG_DEF,omitempty" toml:"ERIS_REG_DEF,omitempty"`
@@ -125,6 +126,7 @@ func SetDefaults() (*viper.Viper, error) {
 	globalConfig.SetDefault("IpfsHost", "http://0.0.0.0") // [csk] TODO: be less opinionated here...
 	globalConfig.SetDefault("IpfsPort", "8080")           // [csk] TODO: be less opinionated here...
 	globalConfig.SetDefault("CrashReport", "bugsnag")
+	globalConfig.SetDefault("ImagesPullTimeout", "15m")
 
 	// compilers defaults
 	globalConfig.SetDefault("CompilersHost", "https://compilers.eris.industries")
@@ -183,6 +185,8 @@ func GetConfigValue(key string) string {
 		return GlobalConfig.Config.DockerCertPath
 	case "CrashReport":
 		return GlobalConfig.Config.CrashReport
+	case "ImagesPullTimeout":
+		return GlobalConfig.Config.ImagesPullTimeout
 	//image defaults
 	case "ERIS_REG_DEF":
 		return GlobalConfig.Config.ERIS_REG_DEF
