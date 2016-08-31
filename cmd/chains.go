@@ -448,7 +448,8 @@ func MakeChain(cmd *cobra.Command, args []string) {
 		cmd.Help()
 		IfExit(fmt.Errorf("\nThe --account-types and --chain-type flags are incompatible with the --known flag. Please use only one of these."))
 	}
-	if !do.Known {
+
+	if !do.Known && len(do.AccountTypes) == 0 && do.ChainType == "" {
 		config.GlobalConfig.InteractiveWriter = os.Stdout
 		config.GlobalConfig.InteractiveErrorWriter = os.Stderr
 		do.Operations.Terminal = true
