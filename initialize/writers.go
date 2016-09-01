@@ -169,6 +169,7 @@ func pullDefaultImages() error {
 
 			select {
 			case <-time.After(timeoutDuration):
+				util.SendReport(fmt.Errorf("`eris init` timed out (%v)", timeoutDuration))
 				timeout <- fmt.Errorf(`
 It looks like marmots are taking too long to download the necessary images...
 Please, try restarting the [eris init] command one more time now or a bit later.
