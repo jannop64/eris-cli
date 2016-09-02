@@ -311,6 +311,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	do.ConfigFile = filepath.Join(do.Path, "config.toml")
 
 	// Copy do.Path, do.GenesisFile, do.ConfigFile, do.Priv into container.
+	// containerDst should not be do.ChainID but rather do.Name
 	containerDst := path.Join(ErisContainerRoot, "chains", do.ChainID) // path in container
 	dst := filepath.Join(DataContainersPath, do.Name, containerDst)    // path on host
 
@@ -322,6 +323,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	if err = os.MkdirAll(dst, 0700); err != nil {
 		return fmt.Errorf("Error making data directory: %v", err)
 	}
+
 	//do.Config will need tuning
 	filesToCopy := []stringPair{
 		{do.Path, ""},
