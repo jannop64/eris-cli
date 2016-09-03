@@ -113,7 +113,7 @@ func Execute() {
 	InitializeConfig()
 	AddGlobalFlags()
 	AddCommands()
-	ErisCmd.Execute()
+	IfExit(ErisCmd.Execute())
 }
 
 // Define the commands
