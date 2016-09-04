@@ -20,7 +20,6 @@ var (
 	ErisContainerRoot = "/home/eris/.eris" // XXX: this is used as root in the `eris/base` image
 
 	// Major Directories
-	ActionsPath  = filepath.Join(ErisRoot, "actions")
 	AppsPath     = filepath.Join(ErisRoot, "apps") // previously "dapps"
 	BundlesPath  = filepath.Join(ErisRoot, "bundles")
 	ChainsPath   = filepath.Join(ErisRoot, "chains") // previously "blockchains"
@@ -57,7 +56,6 @@ var (
 
 var MajorDirs = []string{
 	ErisRoot,
-	ActionsPath,
 	AppsPath,
 	BundlesPath,
 	ChainsPath,
