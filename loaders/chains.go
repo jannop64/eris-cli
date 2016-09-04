@@ -23,14 +23,14 @@ const (
 	ErisChainNew   = "new"
 )
 
-// LoadChainDefinition reads the "default" then chainName definition files
+// LoadChainConfigFile reads the "default" then chainName definition files
 // from the common.ChainsPath directory and returns a chain structure set
-// accordingly. LoadChainDefinition also returns missing files or definition
+// accordingly. LoadChainConfigFile also returns missing files or definition
 // reading errors, if any.
 
 // TODO refactor to find the config.toml given from the "CONFIG_PATH"
 // in whichever subdirectory
-func LoadChainDefinition(chainName string) (*definitions.Chain, error) {
+func LoadChainConfigFile(chainName string) (*definitions.Chain, error) {
 	chain := definitions.BlankChain()
 	chain.Name = chainName
 	chain.Operations.ContainerType = definitions.TypeChain
@@ -74,6 +74,8 @@ func LoadChainDefinition(chainName string) (*definitions.Chain, error) {
 
 	// Overwrite chain.ChainID and chain.Service according from
 	// the definition.
+
+	// TODO remove this overwrite... ?
 	chain.ChainID = chainName
 
 	if err = MarshalChainDefinition(definition, chain); err != nil {
@@ -86,11 +88,12 @@ func LoadChainDefinition(chainName string) (*definitions.Chain, error) {
 
 	checkChainNames(chain)
 	log.WithFields(log.Fields{
-		"container number": 1,
-		"environment":      chain.Service.Environment,
-		"entrypoint":       chain.Service.EntryPoint,
-		"cmd":              chain.Service.Command,
-	}).Debug("Chain definition loaded")
+		"chain name":  chain.Name,
+		"chain ID":    chain.chainID,
+		"environment": chain.Service.Environment,
+		"entrypoint":  chain.Service.EntryPoint,
+		"cmd":         chain.Service.Command,
+	}).Warn("Chain definition loaded") // use warn temporarily.
 	return chain, nil
 }
 
@@ -98,7 +101,7 @@ func LoadChainDefinition(chainName string) (*definitions.Chain, error) {
 // and set the CHAIN_ID environment variable. ChainsAsAService
 // can return config load errors.
 func ChainsAsAService(chainName string) (*definitions.ServiceDefinition, error) {
-	chain, err := LoadChainDefinition(chainName)
+	chain, err := LoadChainConfigFile(chainName)
 	if err != nil {
 		return nil, err
 	}

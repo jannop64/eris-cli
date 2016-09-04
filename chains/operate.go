@@ -109,7 +109,7 @@ func StartChain(do *definitions.Do) error {
 }
 
 func StopChain(do *definitions.Do) error {
-	chain, err := loaders.LoadChainDefinition(do.Name)
+	chain, err := loaders.LoadChainConfigFile(do.Name)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func ExecChain(do *definitions.Do) (buf *bytes.Buffer, err error) {
 }
 
 func startChain(do *definitions.Do, exec bool) (buf *bytes.Buffer, err error) {
-	chain, err := loaders.LoadChainDefinition(do.Name)
+	chain, err := loaders.LoadChainConfigFile(do.Name)
 	// ^ does not load chain.ChainID
 	if err != nil {
 		log.Error("Cannot start a chain I cannot find")
@@ -252,7 +252,7 @@ func bootDependencies(chain *definitions.Chain, do *definitions.Do) error {
 		do.Name = name // undo side effects
 
 		for _, chainName := range chain.Dependencies.Chains {
-			chn, err := loaders.LoadChainDefinition(chainName)
+			chn, err := loaders.LoadChainConfigFile(chainName)
 			if err != nil {
 				return err
 			}
@@ -281,7 +281,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	log.Warn(fmt.Sprintf("CHAIN_ID: %s", do.ChainID))
 
 	// writes a pointer (similar to checked out chain) for do.Path in the chain main dir
-	// this can then be read by loaders.LoadChainDefinition(), in order to get the
+	// this can then be read by loaders.LoadChainConfigFile(), in order to get the
 	// path to the config.toml that was written _in each directory_ (except for simplechain:( )
 	// this allows cli to keep track of a given config.toml
 	// [zr] this may conflict with how we use --machine ... ?
@@ -358,7 +358,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	log.Warn(do.ChainID)
 
 	// need to have chainID written in here... ?
-	chain, err = loaders.LoadChainDefinition(do.Name)
+	chain, err = loaders.LoadChainConfigFile(do.Name)
 	if err != nil {
 		return err
 	}
@@ -545,7 +545,7 @@ func whatChainStuffExists(chainName string) (bool, bool, bool, bool) {
 	}
 
 	// does the config file exist?
-	_, err := loaders.LoadChainDefinition(chainName) // TODO rename the func in loaders
+	_, err := loaders.LoadChainConfigFile(chainName) // TODO rename the func in loaders
 	if err == nil {
 		chainConfigExists = true
 	} else {
