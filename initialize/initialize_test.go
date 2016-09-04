@@ -21,7 +21,6 @@ import (
 
 var erisDir = filepath.Join(os.TempDir(), "eris")
 var servDir = filepath.Join(erisDir, "services")
-var actDir = filepath.Join(erisDir, "actions")
 var chnDir = filepath.Join(erisDir, "chains")
 var chnDefDir = filepath.Join(chnDir, "default")
 var toadUp bool
@@ -63,16 +62,10 @@ func TestPullImages(t *testing.T) {
 
 //TestDropService/Action/ChainDefaults are basically just tests
 //that the toadserver is up and running & that the files there
-//match the definition files in each eris-service/actions/chains
+//match the definition files in each eris-service/chains
 func TestDropServiceDefaults(t *testing.T) {
 	if err := testDrops(servDir, "services"); err != nil {
 		ifExit(fmt.Errorf("error dropping services: %v\n", err))
-	}
-}
-
-func TestDropActionDefaults(t *testing.T) {
-	if err := testDrops(actDir, "actions"); err != nil {
-		ifExit(fmt.Errorf("error dropping actions: %v\n", err))
 	}
 }
 
@@ -106,16 +99,6 @@ func testDrops(dir, kind string) error {
 		if err := dropServiceDefaults(dirGit, "rawgit", ver.SERVICE_DEFINITIONS); err != nil {
 			ifExit(err)
 		}
-	case "actions":
-		if toadUp {
-			if err := dropActionDefaults(dirToad, "toadserver"); err != nil {
-				ifExit(err)
-			}
-		}
-		if err := dropActionDefaults(dirGit, "rawgit"); err != nil {
-			ifExit(err)
-		}
-
 	case "chains":
 		if toadUp {
 			if err := dropChainDefaults(dirToad, "toadserver"); err != nil {

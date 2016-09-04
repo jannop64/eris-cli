@@ -41,7 +41,7 @@ func Initialize(do *definitions.Do) error {
 		}
 	}
 
-	//drops: services, actions, & chain defaults from toadserver
+	//drops: services, & chain defaults from toadserver
 	log.Warn("Initializing default service, action, and chain files")
 	if err := InitDefaults(do, newDir); err != nil {
 		return fmt.Errorf("Error:\tcould not instantiate default services.\n%s\n", err)
@@ -53,7 +53,6 @@ Directory structure initialized:
 
 +-- .eris/
 ¦   +-- eris.toml
-¦   +-- actions/
 ¦   +-- apps/
 ¦   +-- bundles/
 ¦   +-- chains/
@@ -95,11 +94,9 @@ line to the %s definition file.
 
 func InitDefaults(do *definitions.Do, newDir bool) error {
 	var srvPath string
-	var actPath string
 	var chnPath string
 
 	srvPath = common.ServicesPath
-	actPath = common.ActionsPath
 	chnPath = common.ChainsPath
 
 	tsErrorFix := "toadserver may be down: re-run with `--source=rawgit`"
@@ -111,10 +108,6 @@ func InitDefaults(do *definitions.Do, newDir bool) error {
 	}
 
 	if err := dropServiceDefaults(srvPath, do.Source, services); err != nil {
-		return fmt.Errorf("%v\n%s\n", err, tsErrorFix)
-	}
-
-	if err := dropActionDefaults(actPath, do.Source); err != nil {
 		return fmt.Errorf("%v\n%s\n", err, tsErrorFix)
 	}
 
@@ -163,7 +156,6 @@ func checkIfCanOverwrite(doYes bool) error {
 	log.WithField("path", common.ErisRoot).Warn("Eris root directory")
 	log.WithFields(log.Fields{
 		"services path": common.ServicesPath,
-		"actions path":  common.ActionsPath,
 		"chains path":   common.ChainsPath,
 	}).Warn("Continuing may overwrite files in")
 	if common.QueryYesOrNo("Do you wish to continue?") == common.Yes {
@@ -171,7 +163,7 @@ func checkIfCanOverwrite(doYes bool) error {
 	} else {
 		log.Warn("The marmots will not proceed without your permission")
 		log.Warn("Please backup your files and try again")
-		return fmt.Errorf("Error: no permission given to overwrite services and actions")
+		return fmt.Errorf("Error: no permission given to overwrite services")
 	}
 	return nil
 }

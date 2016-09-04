@@ -78,11 +78,11 @@ func New(writer, errorWriter io.Writer) (*Config, error) {
 }
 
 // LoadViper reads the configuration file pointed to by
-// the configPath path and configName filename. 
+// the configPath path and configName filename.
 func LoadViper(configPath, configName string) (*viper.Viper, error) {
 	var errKnown string
 	switch configPath {
-	case dir.ChainsPath, dir.ServicesPath, dir.ActionsPath:
+	case dir.ChainsPath, dir.ServicesPath:
 		errKnown = fmt.Sprintf(`
 
 List available definitions with the [eris %s ls --known] command`, filepath.Base(configPath))
@@ -161,6 +161,94 @@ func Save(settings *Settings) error {
 	enc := toml.NewEncoder(writer)
 	enc.Indent = ""
 	if err := enc.Encode(settings); err != nil {
+		return err
+	}
+	return nil
+}
+
+// config values will be coerced into strings...
+func GetConfigValue(key string) string {
+	if GlobalConfig == nil || GlobalConfig.Config == nil {
+		return ""
+	}
+
+	switch key {
+	case "IpfsHost":
+		return GlobalConfig.Config.IpfsHost
+	case "IpfsPort":
+		return GlobalConfig.Config.IpfsPort
+	case "CompilersHost":
+		return GlobalConfig.Config.CompilersHost
+	case "DockerHost":
+		return GlobalConfig.Config.DockerHost
+	case "DockerCertPath":
+		return GlobalConfig.Config.DockerCertPath
+	case "CrashReport":
+		return GlobalConfig.Config.CrashReport
+	//image defaults
+	case "ERIS_REG_DEF":
+		return GlobalConfig.Config.ERIS_REG_DEF
+	case "ERIS_REG_BAK":
+		return GlobalConfig.Config.ERIS_REG_BAK
+	case "ERIS_IMG_DATA":
+		return GlobalConfig.Config.ERIS_IMG_DATA
+	case "ERIS_IMG_KEYS":
+		return GlobalConfig.Config.ERIS_IMG_KEYS
+	case "ERIS_IMG_DB":
+		return GlobalConfig.Config.ERIS_IMG_DB
+	case "ERIS_IMG_PM":
+		return GlobalConfig.Config.ERIS_IMG_PM
+	case "ERIS_IMG_CM":
+		return GlobalConfig.Config.ERIS_IMG_CM
+	case "ERIS_IMG_IPFS":
+		return GlobalConfig.Config.ERIS_IMG_IPFS
+	default:
+		return ""
+	}
+}
+
+// TODO: [by csk] refactor this and DRY it up as this function really should be in common (without the globalConfig object of course)
+func ChangeErisDir(erisDir string) {
+	if os.Getenv("TESTING") == "true" {
+		return
+	}
+
+	// Do nothing if not initialized.
+	if GlobalConfig == nil {
+		return
+	}
+
+	GlobalConfig.ErisDir = erisDir
+	dir.ErisRoot = erisDir
+
+	// Major directories.
+	dir.AppsPath = filepath.Join(dir.ErisRoot, "apps")     // previously "dapps"
+	dir.ChainsPath = filepath.Join(dir.ErisRoot, "chains") // previously "blockchains"
+	dir.KeysPath = filepath.Join(dir.ErisRoot, "keys")
+	dir.RemotesPath = filepath.Join(dir.ErisRoot, "remotes")
+	dir.ScratchPath = filepath.Join(dir.ErisRoot, "scratch")
+	dir.ServicesPath = filepath.Join(dir.ErisRoot, "services")
+
+	// Chains Directories
+	dir.DefaultChainPath = filepath.Join(dir.ChainsPath, "default")
+	dir.AccountsTypePath = filepath.Join(dir.ChainsPath, "account-types")
+	dir.ChainTypePath = filepath.Join(dir.ChainsPath, "chain-types")
+
+	// Keys Directories
+	dir.KeysDataPath = filepath.Join(dir.KeysPath, "data")
+	dir.KeyNamesPath = filepath.Join(dir.KeysPath, "names")
+
+	// Scratch Directories (basically eris' cache) (globally coordinated)
+	dir.DataContainersPath = filepath.Join(dir.ScratchPath, "data")
+	dir.LanguagesScratchPath = filepath.Join(dir.ScratchPath, "languages") // previously "~/.eris/languages"
+
+	// Services Directories
+	dir.PersonalServicesPath = filepath.Join(dir.ServicesPath, "global")
+}
+
+func marshallGlobalConfig(globalConfig *viper.Viper, config *ErisConfig) error {
+	err := globalConfig.Unmarshal(config)
+	if err != nil {
 		return err
 	}
 	return nil

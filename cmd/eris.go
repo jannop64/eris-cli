@@ -122,8 +122,6 @@ func AddCommands() {
 	ErisCmd.AddCommand(Packages)
 	buildKeysCommand()
 	ErisCmd.AddCommand(Keys)
-	buildActionsCommand()
-	ErisCmd.AddCommand(Actions)
 	buildFilesCommand()
 	ErisCmd.AddCommand(Files)
 	buildDataCommand()

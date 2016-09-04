@@ -2,7 +2,6 @@ package definitions
 
 type Do struct {
 	AddDir        bool     `mapstructure:"," json:"," yaml:"," toml:","`
-	Actions       bool     `mapstructure:"," json:"," yaml:"," toml:","`
 	Force         bool     `mapstructure:"," json:"," yaml:"," toml:","`
 	File          bool     `mapstructure:"," json:"," yaml:"," toml:","`
 	Pull          bool     `mapstructure:"," json:"," yaml:"," toml:","`

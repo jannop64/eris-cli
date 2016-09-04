@@ -68,15 +68,6 @@ func TestsInit(steps int, services ...string) (err error) {
 	return nil
 }
 
-func TestActionDefinitionFile(name string) bool {
-	name = strings.Replace(name, " ", "_", -1)
-
-	if util.GetFileByNameAndType("actions", name) == "" {
-		return false
-	}
-	return true
-}
-
 func TestExistAndRun(name, t string, toExist, toRun bool) error {
 	log.WithFields(log.Fields{
 		"=>":       name,
