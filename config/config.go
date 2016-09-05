@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	ver "github.com/eris-ltd/eris-cli/version"
-	log "github.com/eris-ltd/eris-logger"
+	//log "github.com/eris-ltd/eris-logger"
 
 	dir "github.com/eris-ltd/common/go/common"
 

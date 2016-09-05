@@ -76,7 +76,7 @@ func LoadChainConfigFile(chainName string) (*definitions.Chain, error) {
 	// the definition.
 
 	// TODO remove this overwrite... ?
-	chain.ChainID = chainName
+	// chain.ChainID = chainName
 
 	if err = MarshalChainDefinition(definition, chain); err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func LoadChainConfigFile(chainName string) (*definitions.Chain, error) {
 	checkChainNames(chain)
 	log.WithFields(log.Fields{
 		"chain name":  chain.Name,
-		"chain ID":    chain.chainID,
+		"chain ID":    chain.ChainID,
 		"environment": chain.Service.Environment,
 		"entrypoint":  chain.Service.EntryPoint,
 		"cmd":         chain.Service.Command,
@@ -141,6 +141,8 @@ func ConnectToAChain(srv *definitions.Service, ops *definitions.Operation, name,
 
 // MockChainDefinition creates a chain definition with necessary fields
 // already filled in.
+// XXX [zr] LoadChainConfigFile should do this, no?
+// remove this function....
 func MockChainDefinition(chainName, chainID string) *definitions.Chain {
 	chn := definitions.BlankChain()
 	chn.Name = chainName
@@ -161,16 +163,16 @@ func MockChainDefinition(chainName, chainID string) *definitions.Chain {
 func MarshalChainDefinition(definition *viper.Viper, chain *definitions.Chain) error {
 	log.Debug("Marshalling chain")
 	chnTemp := definitions.BlankChain()
-	err := definition.Unmarshal(chnTemp)
-	if err != nil {
+
+	if err := definition.Unmarshal(chnTemp); err != nil {
 		return fmt.Errorf("The marmots coult not read the chain definition: %v", err)
 	}
 
-	util.Merge(chain.Service, chnTemp.Service)
+	util.Merge(chain.Service, chnTemp.Service) // [zr] we shouldn't need anymore ...?
 	if len(chnTemp.Service.Ports) != 0 {
 		chain.Service.Ports = chnTemp.Service.Ports
 	}
-	//chain.ChainID = chnTemp.ChainID
+	chain.ChainID = chnTemp.ChainID
 
 	// toml bools don't really marshal well "data_container". It can be
 	// in the chain or in the service layer.
@@ -183,21 +185,6 @@ func MarshalChainDefinition(definition *viper.Viper, chain *definitions.Chain) e
 
 	return nil
 }
-
-// TODO remove
-/*func setChainDefaults(chain *definitions.Chain) error {
-	cfg, err := config.LoadViperConfig(filepath.Join(common.ChainsPath), "default")
->>>>>>> get chains working with new config file
-	if err != nil {
-		return err
-	}
-	if err := cfg.Unmarshal(chain); err != nil {
-		return err
-	}
-
-	log.WithField("image", chain.Service.Image).Debug("Chain defaults set")
-	return nil
-}*/
 
 //----------------------------------------------------------------------
 // validation funcs

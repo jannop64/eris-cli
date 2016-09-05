@@ -149,7 +149,6 @@ func startChain(do *definitions.Do, exec bool) (buf *bytes.Buffer, err error) {
 	}
 	log.Warn("CHAINS_ID")
 	log.Warn(chain.ChainID)
-	log.Warn(do.ChainID)
 
 	chain.ChainID = do.Name
 	log.Warn(chain.ChainID)
@@ -158,9 +157,6 @@ func startChain(do *definitions.Do, exec bool) (buf *bytes.Buffer, err error) {
 	if err := bootDependencies(chain, do); err != nil {
 		return nil, err
 	}
-	//if chain.ChainID == "" {
-	//	chain.ChainID = do.ChainID
-	//}
 	log.Warn("CHAIN_ID")
 	log.Warn(chain.ChainID)
 
@@ -275,10 +271,10 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	}
 
 	containerName := util.ChainContainerName(do.Name)
-	if do.ChainID == "" {
-		do.ChainID = do.Name
-	}
-	log.Warn(fmt.Sprintf("CHAIN_ID: %s", do.ChainID))
+	//if do.ChainID == "" {
+	//	do.ChainID = do.Name
+	//}
+	//log.Warn(fmt.Sprintf("CHAIN_ID: %s", do.ChainID))
 
 	// writes a pointer (similar to checked out chain) for do.Path in the chain main dir
 	// this can then be read by loaders.LoadChainConfigFile(), in order to get the
@@ -300,7 +296,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 		if err := perform.DockerCreateData(ops); err != nil {
 			return fmt.Errorf("Error creating data container =>\t%v", err)
 		}
-		ops.Args = []string{"mkdir", "-p", path.Join(ErisContainerRoot, "chains", do.ChainID)}
+		ops.Args = []string{"mkdir", "-p", path.Join(ErisContainerRoot, "chains", do.Name)} // used to be do.ChainID
 		if _, err := perform.DockerExecData(ops, nil); err != nil {
 			return err
 		}
@@ -312,8 +308,8 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 
 	// Copy do.Path, do.GenesisFile, do.ConfigFile, do.Priv into container.
 	// containerDst should not be do.ChainID but rather do.Name
-	containerDst := path.Join(ErisContainerRoot, "chains", do.ChainID) // path in container
-	dst := filepath.Join(DataContainersPath, do.Name, containerDst)    // path on host
+	containerDst := path.Join(ErisContainerRoot, "chains", do.Name) // path in container [zr] used to be do.ChainID
+	dst := filepath.Join(DataContainersPath, do.Name, containerDst) // path on host
 
 	log.WithFields(log.Fields{
 		"container path": containerDst,
@@ -352,22 +348,22 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 	}
 
 	// TODO get rid of this?
-	chain := loaders.MockChainDefinition(do.Name, do.ChainID)
-	log.Warn("chain id")
-	log.Warn(chain.ChainID)
-	log.Warn(do.ChainID)
+	//chain := loaders.MockChainDefinition(do.Name, do.ChainID)
+	//log.Warn("chain id")
+	//log.Warn(chain.ChainID)
+	//log.Warn(do.ChainID)
 
 	// need to have chainID written in here... ?
-	chain, err = loaders.LoadChainConfigFile(do.Name)
+	chain, err := loaders.LoadChainConfigFile(do.Name)
 	if err != nil {
 		return err
 	}
 
-	chain.ChainID = do.ChainID
+	//chain.ChainID = do.ChainID
 
 	log.Warn("chain ID")
 	log.Warn(chain.ChainID)
-	log.Warn(do.ChainID)
+	//log.Warn(do.ChainID)
 
 	log.WithField("image", chain.Service.Image).Debug("Chain loaded")
 	chain.Operations.PublishAllPorts = do.Operations.PublishAllPorts // TODO: remove this and marshall into struct from cli directly
@@ -390,7 +386,7 @@ func setupChain(do *definitions.Do, cmd string) (err error) {
 
 	// set chainid and other vars
 	envVars := []string{
-		fmt.Sprintf("CHAIN_ID=%s", do.ChainID),
+		fmt.Sprintf("CHAIN_ID=%s", chain.ChainID),
 		fmt.Sprintf("CONTAINER_NAME=%s", containerName),
 		fmt.Sprintf("CONFIG_OPTS=%s", configOpts),
 		fmt.Sprintf("NODE_ADDR=%s", do.Gateway), // etcb host.
