@@ -41,8 +41,8 @@ func Initialize(do *definitions.Do) error {
 		}
 	}
 
-	//drops: services, & chain defaults from toadserver
-	log.Warn("Initializing default service, action, and chain files")
+	//drops: service definition defaults
+	log.Warn("Initializing default service defintion files")
 	if err := InitDefaults(do, newDir); err != nil {
 		return fmt.Errorf("Error:\tcould not instantiate default services.\n%s\n", err)
 	}
@@ -99,8 +99,6 @@ func InitDefaults(do *definitions.Do, newDir bool) error {
 	srvPath = common.ServicesPath
 	chnPath = common.ChainsPath
 
-	tsErrorFix := "toadserver may be down: re-run with `--source=rawgit`"
-
 	// Default or custom service definition files list.
 	services := ver.SERVICE_DEFINITIONS
 	if len(do.ServicesSlice) != 0 {
@@ -108,11 +106,11 @@ func InitDefaults(do *definitions.Do, newDir bool) error {
 	}
 
 	if err := dropServiceDefaults(srvPath, do.Source, services); err != nil {
-		return fmt.Errorf("%v\n%s\n", err, tsErrorFix)
+		return err
 	}
 
 	if err := dropChainDefaults(chnPath, do.Source); err != nil {
-		return fmt.Errorf("%v\n%s\n", err, tsErrorFix)
+		return err
 	}
 
 	log.WithField("root", common.ErisRoot).Warn("Initialized Eris root directory")

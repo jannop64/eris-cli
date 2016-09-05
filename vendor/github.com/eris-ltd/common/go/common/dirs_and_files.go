@@ -138,7 +138,6 @@ func ChangeErisRoot(erisDir string) {
 	ErisRoot = erisDir
 
 	// Major directories.
-	ActionsPath = filepath.Join(ErisRoot, "actions")
 	AppsPath = filepath.Join(ErisRoot, "apps")     // previously "dapps"
 	ChainsPath = filepath.Join(ErisRoot, "chains") // previously "blockchains"
 	KeysPath = filepath.Join(ErisRoot, "keys")
