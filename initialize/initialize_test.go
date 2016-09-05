@@ -75,12 +75,11 @@ func testDrops(dir, kind string) error {
 
 	switch kind {
 	case "services":
-		//pull from rawgit
-		if err := dropServiceDefaults(dirGit, "rawgit", ver.SERVICE_DEFINITIONS); err != nil {
+		if err := dropServiceDefaults(dirGit, ver.SERVICE_DEFINITIONS); err != nil {
 			ifExit(err)
 		}
 	case "chains":
-		if err := dropChainDefaults(dirGit, "rawgit"); err != nil {
+		if err := dropChainDefaults(dirGit); err != nil {
 			ifExit(err)
 		}
 	}
@@ -99,7 +98,7 @@ func readDirs(dirGit string) {
 
 func testsInit() error {
 	common.ChangeErisRoot(erisDir)
-	
+
 	var err error
 	config.Global, err = config.New(os.Stdout, os.Stderr)
 	if err != nil {

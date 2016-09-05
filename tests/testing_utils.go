@@ -58,7 +58,6 @@ func TestsInit(steps int, services ...string) (err error) {
 	do.Pull = false //don't pull imgs
 	do.Yes = true   //over-ride command-line prompts
 	do.Quiet = true
-	do.Source = "rawgit"
 	do.ServicesSlice = services
 	if err := ini.Initialize(do); err != nil {
 		IfExit(fmt.Errorf("TRAGIC. Could not initialize the eris dir: %s.\n", err))

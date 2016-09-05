@@ -105,11 +105,11 @@ func InitDefaults(do *definitions.Do, newDir bool) error {
 		services = do.ServicesSlice
 	}
 
-	if err := dropServiceDefaults(srvPath, do.Source, services); err != nil {
+	if err := dropServiceDefaults(srvPath, services); err != nil {
 		return err
 	}
 
-	if err := dropChainDefaults(chnPath, do.Source); err != nil {
+	if err := dropChainDefaults(chnPath); err != nil {
 		return err
 	}
 

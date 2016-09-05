@@ -26,7 +26,7 @@ import (
 
 // XXX all files in this sequence must be added to both
 // the respective GH repo & mindy testnet (pinkpenguin.interblock.io:46657/list_names)
-func dropServiceDefaults(dir, from string, services []string) error {
+func dropServiceDefaults(dir string, services []string) error {
 	for _, service := range services {
 		var err error
 
@@ -36,7 +36,7 @@ func dropServiceDefaults(dir, from string, services []string) error {
 		case "ipfs":
 			err = writeDefaultFile(common.ServicesPath, "ipfs.toml", defServiceIPFS)
 		default:
-			err = drops([]string{service}, "services", dir, from)
+			err = drops([]string{service}, "services", dir)
 		}
 		if err != nil {
 			return fmt.Errorf("Cannot add default %s: %v", service, err)
@@ -46,8 +46,8 @@ func dropServiceDefaults(dir, from string, services []string) error {
 	return nil
 }
 
-func dropChainDefaults(dir, from string) error {
-	if err := drops(ver.CHAIN_DEFINITIONS, "chains", dir, from); err != nil {
+func dropChainDefaults(dir string) error {
+	if err := drops(ver.CHAIN_DEFINITIONS, "chains", dir); err != nil {
 		return err
 	}
 
@@ -182,8 +182,8 @@ This is likely a network performance issue with our Docker hosting provider`)
 	return nil
 }
 
-func drops(files []string, typ, dir, from string) error {
-	//to get from rawgit
+func drops(files []string, typ, dir string) error {
+	//to get from github
 	var repo string
 	if typ == "services" {
 		repo = "eris-services"
@@ -202,12 +202,10 @@ func drops(files []string, typ, dir, from string) error {
 		}
 	}
 
-	if from == "rawgit" {
-		for _, file := range files {
-			log.WithField(file, dir).Debug("Getting file from GitHub, dropping into")
-			if err := util.GetFromGithub("eris-ltd", repo, "master", archPrefix+file+".toml", dir, file+".toml"); err != nil {
-				return err
-			}
+	for _, file := range files {
+		log.WithField(file, dir).Debug("Getting file from GitHub, dropping into")
+		if err := util.GetFromGithub("eris-ltd", repo, "master", archPrefix+file+".toml", dir, file+".toml"); err != nil {
+			return err
 		}
 	}
 	return nil
