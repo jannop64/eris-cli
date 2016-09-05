@@ -53,11 +53,11 @@ func LoadChainConfigFile(chainName string) (*definitions.Chain, error) {
 		return nil, err
 	}
 
-	definition, err := config.LoadViper(string(pathToConfig), "config")
+	definition, err = config.LoadViper(string(pathToConfig), "config")
 	if err != nil {
 		return nil, err
 		// try in chain dir
-		definition, err := config.LoadViper(string(pathToConfig), "config")
+		definition, err = config.LoadViper(string(pathToConfig), "config")
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func LoadChainConfigFile(chainName string) (*definitions.Chain, error) {
 		log.Warn("MARMOTpathConfig")
 		log.Warn(string(pathToConfig))
 
-		definition, err := config.LoadViper(string(pathToConfig), "config")
+		definition, err = config.LoadViper(string(pathToConfig), "config")
 		if err != nil {
 			return nil, err
 		}
